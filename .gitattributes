@@ -1,0 +1,2 @@
+scripts/build.bat text eol=lf
+scripts/run.bat text eol=lf
