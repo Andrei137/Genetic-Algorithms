@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iomanip>
 
-Genetics* Genetics::m_instance = nullptr;
+std::unique_ptr<Genetics> Genetics::m_instance{ nullptr };
 
 Genetics::Genetics()
 {
@@ -32,7 +32,7 @@ void Genetics::generate_population()
 
 long double Genetics::fitness(long double a_value) const
 {
-    return a_value * a_value * std::get<2>(m_parameters) + a_value * std::get<1>(m_parameters) + std::get<0>(m_parameters);
+    return a_value * a_value * std::get<0>(m_parameters) + a_value * std::get<1>(m_parameters) + std::get<2>(m_parameters);
 }
 
 long double Genetics::total_fitness() const
@@ -102,7 +102,7 @@ void Genetics::set_selection_intervals()
     for (int i = 0; i < m_population_size; ++i)
     {
         sum += m_population[i].get_selection_probability();
-        if (m_print_info && sum < 1)
+        if (m_print_info && std::abs(sum - 1) > std::numeric_limits<long double>::epsilon())
         {
             std::cout << sum << ' ';
         }
@@ -331,7 +331,9 @@ std::istream& operator>>(std::istream& a_in, Genetics& a_genetics)
 {
     a_genetics.m_population_size = read<int>(a_in);
     a_genetics.m_interval = read<Interval>(a_in);
-    a_genetics.m_parameters = std::make_tuple(read<long double>(a_in), read<long double>(a_in), read<long double>(a_in));
+    std::get<0>(a_genetics.m_parameters) = read<long double>(a_in);
+    std::get<1>(a_genetics.m_parameters) = read<long double>(a_in);
+    std::get<2>(a_genetics.m_parameters) = read<long double>(a_in);
     a_genetics.m_precision = read<int>(a_in);
     a_genetics.m_crossover_probability = read<long double>(a_in);
     a_genetics.m_mutation_probability = read<long double>(a_in);
@@ -363,7 +365,7 @@ std::ostream& operator<<(std::ostream& a_out, const Genetics& a_genetics)
     a_out << "Input\n";
     a_out << "Population size: " << a_genetics.m_population_size << '\n';
     a_out << "Interval: " << a_genetics.m_interval << '\n';
-    a_out << "Parameters: " << std::get<2>(a_genetics.m_parameters) << ' ' << std::get<1>(a_genetics.m_parameters) << ' ' << std::get<0>(a_genetics.m_parameters) << '\n';
+    a_out << "Parameters: " << std::get<0>(a_genetics.m_parameters) << ' ' << std::get<1>(a_genetics.m_parameters) << ' ' << std::get<2>(a_genetics.m_parameters) << '\n';
     a_out << "Precision: " << a_genetics.m_precision << '\n';
     a_out << "Crossover probability: " << a_genetics.m_crossover_probability << '\n';
     a_out << "Mutation probability: " << a_genetics.m_mutation_probability << '\n';
@@ -378,7 +380,7 @@ Genetics& Genetics::get_instance()
 {
     if (m_instance == nullptr)
     {
-        m_instance = new Genetics();
+        m_instance = std::unique_ptr<Genetics>(new Genetics());
     }
     return *m_instance;
 }

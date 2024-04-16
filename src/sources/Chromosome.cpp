@@ -74,8 +74,8 @@ std::ostream& operator<<(std::ostream& a_out, const Chromosome& a_chromosome)
 
 void Chromosome::print_genes(std::ostream& a_out) const
 {
-    for (const auto& gene : m_genes)
+    for (int i = static_cast<int>(m_genes.size()) - 1; i >= 0; --i)
     {
-        a_out << gene;
+        a_out << m_genes[i];
     }
 }

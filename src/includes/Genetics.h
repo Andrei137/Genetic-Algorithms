@@ -2,12 +2,13 @@
 
 #include "Chromosome.h"
 #include <iostream>
+#include <memory>
 #include <tuple>
 
 class Genetics
 {
     // Singleton
-    static Genetics* m_instance;
+    static std::unique_ptr<Genetics> m_instance;
 
     // Members
     int m_population_size{};
